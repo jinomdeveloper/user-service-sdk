@@ -9,6 +9,7 @@ use Jinom\UserServiceSdk\Exceptions\UserServiceException;
 class UserServiceClient
 {
     private string $baseUrl;
+
     private int $timeout;
 
     public function __construct(
@@ -34,7 +35,7 @@ class UserServiceClient
             ->timeout($this->timeout)
             ->post("{$this->baseUrl}/api/v1/users/register", $userData);
 
-        if (!$response->successful()) {
+        if (! $response->successful()) {
             throw UserServiceException::httpError($response->status(), $response->body());
         }
 
@@ -62,7 +63,7 @@ class UserServiceClient
             ->timeout($this->timeout)
             ->patch("{$this->baseUrl}/api/v1/users-management/{$userId}", $userData);
 
-        if (!$response->successful()) {
+        if (! $response->successful()) {
             throw UserServiceException::httpError($response->status(), $response->body());
         }
 
@@ -81,10 +82,11 @@ class UserServiceClient
     {
         $token = $this->tokenManager->getValidToken($localUserId);
 
-        if (!$token) {
+        if (! $token) {
             Log::warning('UserServiceSdk: No token for findByKeycloakId', [
                 'local_user_id' => $localUserId,
             ]);
+
             return null;
         }
 
@@ -96,7 +98,7 @@ class UserServiceClient
             return null;
         }
 
-        if (!$response->successful()) {
+        if (! $response->successful()) {
             throw UserServiceException::httpError($response->status(), $response->body());
         }
 
@@ -110,6 +112,7 @@ class UserServiceClient
     {
         try {
             $user = $this->findByKeycloakId($localUserId, $keycloakSub);
+
             return $user !== null;
         } catch (UserServiceException $e) {
             if ($e->getCode() === 404) {
@@ -134,7 +137,7 @@ class UserServiceClient
             return null;
         }
 
-        if (!$response->successful()) {
+        if (! $response->successful()) {
             throw UserServiceException::httpError($response->status(), $response->body());
         }
 
@@ -152,7 +155,7 @@ class UserServiceClient
             ->timeout($this->timeout)
             ->delete("{$this->baseUrl}/api/v1/users-management/{$userId}");
 
-        if (!$response->successful() && $response->status() !== 404) {
+        if (! $response->successful() && $response->status() !== 404) {
             throw UserServiceException::httpError($response->status(), $response->body());
         }
 
@@ -183,7 +186,7 @@ class UserServiceClient
     {
         $token = $this->tokenManager->getValidToken($localUserId);
 
-        if (!$token) {
+        if (! $token) {
             throw UserServiceException::noToken();
         }
 
@@ -196,6 +199,7 @@ class UserServiceClient
     public function setBaseUrl(string $baseUrl): self
     {
         $this->baseUrl = rtrim($baseUrl, '/');
+
         return $this;
     }
 }

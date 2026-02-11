@@ -8,7 +8,7 @@ use Jinom\UserServiceSdk\Services\UserSyncService;
 
 /**
  * Main entry point for User Service SDK
- * 
+ *
  * Provides a unified interface for:
  * - Token management (store, refresh, retrieve)
  * - User synchronization to User Service
@@ -89,9 +89,9 @@ class UserServiceSdk
     /**
      * Sync user to User Service (async via queue)
      *
-     * @param object|array $keycloakUser Keycloak user data from Socialite
-     * @param object|array $localUser Local user model
-     * @param array $tokenData Token data to store
+     * @param  object|array  $keycloakUser  Keycloak user data from Socialite
+     * @param  object|array  $localUser  Local user model
+     * @param  array  $tokenData  Token data to store
      */
     public function syncUser(object|array $keycloakUser, object|array $localUser, array $tokenData = []): void
     {
