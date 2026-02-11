@@ -32,6 +32,7 @@ return [
     */
     'sync' => [
         'enabled' => env('USER_SERVICE_SYNC_ENABLED', true),
+        'registration_enabled' => env('USER_SERVICE_REGISTRATION_ENABLED', true),
         'queue' => env('USER_SERVICE_SYNC_QUEUE', 'default'),
         'retry_times' => env('USER_SERVICE_SYNC_RETRY', 3),
         'retry_delay' => env('USER_SERVICE_SYNC_RETRY_DELAY', 60), // seconds

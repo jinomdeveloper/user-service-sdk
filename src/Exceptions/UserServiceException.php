@@ -64,4 +64,15 @@ class UserServiceException extends Exception
             code: 404
         );
     }
+
+    /**
+     * Create exception for disabled registration
+     */
+    public static function registrationDisabled(string $identifier): self
+    {
+        return new self(
+            message: "User registration is disabled: {$identifier}",
+            code: 403
+        );
+    }
 }
