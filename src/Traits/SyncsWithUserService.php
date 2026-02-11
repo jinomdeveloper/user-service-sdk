@@ -6,22 +6,22 @@ use Jinom\UserServiceSdk\Facades\UserServiceSdk;
 
 /**
  * Trait for easily syncing users to User Service after Keycloak login.
- * 
+ *
  * Usage in LoginController:
- * 
+ *
  * use Jinom\UserServiceSdk\Traits\SyncsWithUserService;
- * 
+ *
  * class LoginController extends Controller
  * {
  *     use SyncsWithUserService;
- * 
+ *
  *     public function handleCallback()
  *     {
  *         $keycloakUser = Socialite::driver('keycloak')->user();
  *         $user = User::updateOrCreate([...]);
- *         
+ *
  *         $this->syncToUserService($keycloakUser, $user);
- *         
+ *
  *         // or with token data
  *         $this->syncToUserService($keycloakUser, $user, [
  *             'access_token' => $keycloakUser->token,
@@ -36,9 +36,9 @@ trait SyncsWithUserService
     /**
      * Sync user to User Service after Keycloak login
      *
-     * @param object|array $keycloakUser The Keycloak user data from Socialite
-     * @param object|array $localUser The local user model
-     * @param array $tokenData Optional token data (if not provided, extracts from keycloakUser)
+     * @param  object|array  $keycloakUser  The Keycloak user data from Socialite
+     * @param  object|array  $localUser  The local user model
+     * @param  array  $tokenData  Optional token data (if not provided, extracts from keycloakUser)
      */
     protected function syncToUserService(object|array $keycloakUser, object|array $localUser, array $tokenData = []): void
     {
@@ -58,8 +58,8 @@ trait SyncsWithUserService
     /**
      * Store tokens for later use
      *
-     * @param int|string $userId Local user ID
-     * @param array $tokenData Token data from Keycloak
+     * @param  int|string  $userId  Local user ID
+     * @param  array  $tokenData  Token data from Keycloak
      */
     protected function storeKeycloakTokens(int|string $userId, array $tokenData): void
     {
@@ -69,8 +69,7 @@ trait SyncsWithUserService
     /**
      * Get a valid access token (auto-refreshes if needed)
      *
-     * @param int|string $userId Local user ID
-     * @return string|null
+     * @param  int|string  $userId  Local user ID
      */
     protected function getKeycloakToken(int|string $userId): ?string
     {
@@ -80,7 +79,7 @@ trait SyncsWithUserService
     /**
      * Clear all tokens for a user (e.g., on logout)
      *
-     * @param int|string $userId Local user ID
+     * @param  int|string  $userId  Local user ID
      */
     protected function clearKeycloakTokens(int|string $userId): void
     {

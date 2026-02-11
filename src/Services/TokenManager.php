@@ -11,10 +11,15 @@ use Jinom\UserServiceSdk\Exceptions\TokenRefreshException;
 class TokenManager implements TokenManagerInterface
 {
     private string $tokenUrl;
+
     private string $clientId;
+
     private string $clientSecret;
+
     private string $cachePrefix;
+
     private int $cacheTtl;
+
     private int $bufferSeconds;
 
     public function __construct()
@@ -22,7 +27,7 @@ class TokenManager implements TokenManagerInterface
         $baseUrl = config('user-service-sdk.keycloak.base_url');
         $realm = config('user-service-sdk.keycloak.realm');
 
-        $this->tokenUrl = rtrim($baseUrl, '/') . "/realms/{$realm}/protocol/openid-connect/token";
+        $this->tokenUrl = rtrim($baseUrl, '/')."/realms/{$realm}/protocol/openid-connect/token";
         $this->clientId = config('user-service-sdk.keycloak.client_id');
         $this->clientSecret = config('user-service-sdk.keycloak.client_secret');
         $this->cachePrefix = config('user-service-sdk.token.cache_prefix', 'user_service_tokens');
@@ -64,8 +69,9 @@ class TokenManager implements TokenManagerInterface
     {
         $tokenData = $this->getTokenData($userId);
 
-        if (!$tokenData) {
+        if (! $tokenData) {
             Log::warning('UserServiceSdk: No tokens found', ['user_id' => $userId]);
+
             return null;
         }
 
@@ -75,6 +81,7 @@ class TokenManager implements TokenManagerInterface
 
             if (empty($tokenData['refresh_token'])) {
                 Log::error('UserServiceSdk: No refresh token available', ['user_id' => $userId]);
+
                 return null;
             }
 
@@ -99,7 +106,7 @@ class TokenManager implements TokenManagerInterface
                     'refresh_token' => $refreshToken,
                 ]);
 
-            if (!$response->successful()) {
+            if (! $response->successful()) {
                 $errorDescription = $response->json('error_description') ?? $response->body();
 
                 Log::error('UserServiceSdk: Token refresh failed', [
@@ -138,6 +145,7 @@ class TokenManager implements TokenManagerInterface
             ]);
 
             $this->clearTokens($userId);
+
             return null;
         }
     }
@@ -167,13 +175,13 @@ class TokenManager implements TokenManagerInterface
     {
         $tokenData = $this->getTokenData($userId);
 
-        if (!$tokenData) {
+        if (! $tokenData) {
             return false;
         }
 
         // If access token expired, check if refresh token is available
         if ($this->isTokenExpired($tokenData['expires_at'])) {
-            return !empty($tokenData['refresh_token']);
+            return ! empty($tokenData['refresh_token']);
         }
 
         return true;
@@ -203,7 +211,7 @@ class TokenManager implements TokenManagerInterface
         try {
             $baseUrl = config('user-service-sdk.keycloak.base_url');
             $realm = config('user-service-sdk.keycloak.realm');
-            $introspectUrl = rtrim($baseUrl, '/') . "/realms/{$realm}/protocol/openid-connect/token/introspect";
+            $introspectUrl = rtrim($baseUrl, '/')."/realms/{$realm}/protocol/openid-connect/token/introspect";
 
             $response = Http::asForm()
                 ->timeout(30)
@@ -215,12 +223,14 @@ class TokenManager implements TokenManagerInterface
 
             if ($response->successful()) {
                 $data = $response->json();
+
                 return $data['active'] ? $data : null;
             }
 
             return null;
         } catch (\Exception $e) {
             Log::error('UserServiceSdk: Token introspection failed', ['error' => $e->getMessage()]);
+
             return null;
         }
     }

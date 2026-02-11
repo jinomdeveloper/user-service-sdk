@@ -2,11 +2,11 @@
 
 namespace Jinom\UserServiceSdk;
 
-use Spatie\LaravelPackageTools\Package;
-use Spatie\LaravelPackageTools\PackageServiceProvider;
 use Jinom\UserServiceSdk\Services\TokenManager;
 use Jinom\UserServiceSdk\Services\UserServiceClient;
 use Jinom\UserServiceSdk\Services\UserSyncService;
+use Spatie\LaravelPackageTools\Package;
+use Spatie\LaravelPackageTools\PackageServiceProvider;
 
 class UserServiceSdkServiceProvider extends PackageServiceProvider
 {
@@ -21,7 +21,7 @@ class UserServiceSdkServiceProvider extends PackageServiceProvider
     {
         // Register TokenManager as singleton
         $this->app->singleton(TokenManager::class, function ($app) {
-            return new TokenManager();
+            return new TokenManager;
         });
 
         // Register UserServiceClient as singleton

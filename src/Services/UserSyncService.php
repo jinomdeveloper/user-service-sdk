@@ -18,9 +18,9 @@ class UserSyncService
     /**
      * Sync user to User Service (dispatch job if queue enabled)
      *
-     * @param object|array $keycloakUser Data dari Socialite Keycloak
-     * @param object|array $localUser User model dari database lokal
-     * @param array $tokenData Token data untuk disimpan (optional jika sudah disimpan)
+     * @param  object|array  $keycloakUser  Data dari Socialite Keycloak
+     * @param  object|array  $localUser  User model dari database lokal
+     * @param  array  $tokenData  Token data untuk disimpan (optional jika sudah disimpan)
      */
     public function syncUser(object|array $keycloakUser, object|array $localUser, array $tokenData = []): void
     {
@@ -28,14 +28,15 @@ class UserSyncService
         $keycloakSub = $this->extractKeycloakSub($keycloakUser);
 
         // Store tokens if provided
-        if (!empty($tokenData)) {
+        if (! empty($tokenData)) {
             $tokenData['keycloak_id'] = $keycloakSub;
             $this->tokenManager->storeTokens($localUserId, $tokenData);
         }
 
         // Check if sync is enabled
-        if (!config('user-service-sdk.sync.enabled', true)) {
+        if (! config('user-service-sdk.sync.enabled', true)) {
             Log::debug('UserServiceSdk: User sync is disabled');
+
             return;
         }
 
@@ -105,7 +106,6 @@ class UserSyncService
             ]);
 
             throw $e;
-
         } catch (\Exception $e) {
             event(new UserSyncFailed($localUserId, $keycloakSub, $e->getMessage(), 0));
 
@@ -148,11 +148,11 @@ class UserSyncService
         }
 
         // Ensure required fields
-        if (empty($userData['username']) && !empty($userData['email'])) {
+        if (empty($userData['username']) && ! empty($userData['email'])) {
             $userData['username'] = explode('@', $userData['email'])[0];
         }
 
-        return array_filter($userData, fn($v) => $v !== null);
+        return array_filter($userData, fn ($v) => $v !== null);
     }
 
     /**
