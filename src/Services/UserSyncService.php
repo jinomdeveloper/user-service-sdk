@@ -27,6 +27,9 @@ class UserSyncService
         $localUserId = $this->extractUserId($localUser);
         $keycloakSub = $this->extractKeycloakSub($keycloakUser);
         $registrationEnabled = config('user-service-sdk.sync.registration_enabled', true);
+        $queue = config('user-service-sdk.sync.queue', 'default');
+        $queueName = is_string($queue) ? $queue : null;
+        $shouldQueue = $this->shouldUseQueue($registrationEnabled, $queueName);
 
         // Store tokens if provided
         if (! empty($tokenData)) {
@@ -45,7 +48,7 @@ class UserSyncService
         $userData = $this->mapUserData($keycloakUser, $localUser);
 
         // Dispatch job or sync directly
-        if ($registrationEnabled && config('user-service-sdk.sync.queue', 'default')) {
+        if ($shouldQueue) {
             $this->dispatchSyncJob($localUserId, $keycloakSub, $userData);
         } else {
             $this->syncUserDirectly($localUserId, $keycloakSub, $userData);
@@ -178,5 +181,13 @@ class UserSyncService
         }
 
         return $keycloakUser->id ?? $keycloakUser->sub ?? throw new \InvalidArgumentException('Keycloak user must have sub/id');
+    }
+
+    /**
+     * Determine if the sync should be queued
+     */
+    protected function shouldUseQueue(bool $registrationEnabled, ?string $queue): bool
+    {
+        return $registrationEnabled && $queue !== null && $queue !== '';
     }
 }

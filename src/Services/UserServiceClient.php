@@ -178,7 +178,7 @@ class UserServiceClient
         }
 
         if (! $registrationEnabled) {
-            throw UserServiceException::userNotFound($keycloakSub);
+            throw UserServiceException::registrationDisabled($keycloakSub);
         }
 
         return $this->createUser($localUserId, $userData);
