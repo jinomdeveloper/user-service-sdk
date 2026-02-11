@@ -38,6 +38,7 @@ USER_SERVICE_URL=http://user-service:3000
 # Sync Options
 USER_SERVICE_SYNC_ENABLED=true
 USER_SERVICE_SYNC_QUEUE=default
+USER_SERVICE_REGISTRATION_ENABLED=true
 ```
 
 ## Usage

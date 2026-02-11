@@ -26,6 +26,7 @@ class UserSyncService
     {
         $localUserId = $this->extractUserId($localUser);
         $keycloakSub = $this->extractKeycloakSub($keycloakUser);
+        $registrationEnabled = config('user-service-sdk.sync.registration_enabled', true);
 
         // Store tokens if provided
         if (! empty($tokenData)) {
@@ -44,7 +45,7 @@ class UserSyncService
         $userData = $this->mapUserData($keycloakUser, $localUser);
 
         // Dispatch job or sync directly
-        if (config('user-service-sdk.sync.queue', 'default')) {
+        if ($registrationEnabled && config('user-service-sdk.sync.queue', 'default')) {
             $this->dispatchSyncJob($localUserId, $keycloakSub, $userData);
         } else {
             $this->syncUserDirectly($localUserId, $keycloakSub, $userData);
