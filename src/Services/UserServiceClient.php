@@ -59,9 +59,16 @@ class UserServiceClient
             'user_service_id' => $userId,
         ]);
 
+        $userToUpdate = [
+            'username' => $userData['username'],
+            'fullName' => $userData['fullname'],
+            'email' => $userData['email'],
+            'phone' => $userData['phone'],
+        ];
+
         $response = Http::withToken($token)
             ->timeout($this->timeout)
-            ->patch("{$this->baseUrl}/api/v1/users-management/{$userId}", $userData);
+            ->patch("{$this->baseUrl}/api/v1/users-management/{$userId}", $userToUpdate);
 
         if (! $response->successful()) {
             throw UserServiceException::httpError($response->status(), $response->body());
