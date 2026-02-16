@@ -168,12 +168,17 @@ class UserServiceClient
     public function createOrUpdateUser(int|string $localUserId, string $keycloakSub, array $userData): array
     {
         $existingUser = $this->findByKeycloakId($localUserId, $keycloakSub);
+        $registrationEnabled = config('user-service-sdk.sync.registration_enabled', true);
 
         if ($existingUser) {
             $userId = $existingUser['id'] ?? $existingUser['data']['id'] ?? null;
             if ($userId) {
                 return $this->updateUser($localUserId, $userId, $userData);
             }
+        }
+
+        if (! $registrationEnabled) {
+            throw UserServiceException::registrationDisabled($keycloakSub);
         }
 
         return $this->createUser($localUserId, $userData);
