@@ -3,9 +3,9 @@
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
 use Jinom\UserServiceSdk\Exceptions\UserServiceException;
+use Jinom\UserServiceSdk\Services\UserServiceClient;
 use Jinom\UserServiceSdk\Tests\Helpers\FakeTokenManager;
 use Jinom\UserServiceSdk\Tests\Helpers\TestConstants;
-use Jinom\UserServiceSdk\Services\UserServiceClient;
 
 it('rejects registration when disabled and user not found', function () {
     Config::set('user-service-sdk.user_service.base_url', 'http://user-service.test');

@@ -2,8 +2,8 @@
 
 namespace Jinom\UserServiceSdk\Tests;
 
-use Orchestra\Testbench\TestCase as Orchestra;
 use Jinom\UserServiceSdk\UserServiceSdkServiceProvider;
+use Orchestra\Testbench\TestCase as Orchestra;
 
 class TestCase extends Orchestra
 {
