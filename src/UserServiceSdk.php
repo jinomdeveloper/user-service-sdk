@@ -2,7 +2,7 @@
 
 namespace Jinom\UserServiceSdk;
 
-use Jinom\UserServiceSdk\Services\TokenManager;
+use Jinom\Keycloak\Contracts\TokenManagerInterface;
 use Jinom\UserServiceSdk\Services\UserServiceClient;
 use Jinom\UserServiceSdk\Services\UserSyncService;
 
@@ -10,14 +10,14 @@ use Jinom\UserServiceSdk\Services\UserSyncService;
  * Main entry point for User Service SDK
  *
  * Provides a unified interface for:
- * - Token management (store, refresh, retrieve)
+ * - Token management (via keycloak-sdk)
  * - User synchronization to User Service
  * - User Service API operations
  */
 class UserServiceSdk
 {
     public function __construct(
-        protected TokenManager $tokenManager,
+        protected TokenManagerInterface $tokenManager,
         protected UserServiceClient $userServiceClient,
         protected UserSyncService $userSyncService
     ) {}
@@ -173,7 +173,7 @@ class UserServiceSdk
     /**
      * Get Token Manager instance
      */
-    public function tokenManager(): TokenManager
+    public function tokenManager(): TokenManagerInterface
     {
         return $this->tokenManager;
     }

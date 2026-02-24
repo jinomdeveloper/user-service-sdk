@@ -2,6 +2,7 @@
 
 namespace Jinom\UserServiceSdk\Traits;
 
+use Jinom\Keycloak\Facades\KeycloakSdk;
 use Jinom\UserServiceSdk\Facades\UserServiceSdk;
 
 /**
@@ -63,7 +64,7 @@ trait SyncsWithUserService
      */
     protected function storeKeycloakTokens(int|string $userId, array $tokenData): void
     {
-        UserServiceSdk::storeTokens($userId, $tokenData);
+        KeycloakSdk::storeTokens($userId, $tokenData);
     }
 
     /**
@@ -73,7 +74,7 @@ trait SyncsWithUserService
      */
     protected function getKeycloakToken(int|string $userId): ?string
     {
-        return UserServiceSdk::getValidToken($userId);
+        return KeycloakSdk::getValidToken($userId);
     }
 
     /**
@@ -83,6 +84,6 @@ trait SyncsWithUserService
      */
     protected function clearKeycloakTokens(int|string $userId): void
     {
-        UserServiceSdk::clearTokens($userId);
+        KeycloakSdk::clearTokens($userId);
     }
 }

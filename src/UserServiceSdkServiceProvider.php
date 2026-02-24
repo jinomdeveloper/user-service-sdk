@@ -2,7 +2,7 @@
 
 namespace Jinom\UserServiceSdk;
 
-use Jinom\UserServiceSdk\Services\TokenManager;
+use Jinom\Keycloak\Contracts\TokenManagerInterface;
 use Jinom\UserServiceSdk\Services\UserServiceClient;
 use Jinom\UserServiceSdk\Services\UserSyncService;
 use Spatie\LaravelPackageTools\Package;
@@ -19,22 +19,17 @@ class UserServiceSdkServiceProvider extends PackageServiceProvider
 
     public function packageRegistered(): void
     {
-        // Register TokenManager as singleton
-        $this->app->singleton(TokenManager::class, function ($app) {
-            return new TokenManager;
-        });
-
-        // Register UserServiceClient as singleton
+        // Register UserServiceClient as singleton (uses TokenManager from keycloak-sdk)
         $this->app->singleton(UserServiceClient::class, function ($app) {
             return new UserServiceClient(
-                $app->make(TokenManager::class)
+                $app->make(TokenManagerInterface::class)
             );
         });
 
         // Register UserSyncService as singleton
         $this->app->singleton(UserSyncService::class, function ($app) {
             return new UserSyncService(
-                $app->make(TokenManager::class),
+                $app->make(TokenManagerInterface::class),
                 $app->make(UserServiceClient::class)
             );
         });
@@ -42,7 +37,7 @@ class UserServiceSdkServiceProvider extends PackageServiceProvider
         // Register main SDK class as singleton
         $this->app->singleton(UserServiceSdk::class, function ($app) {
             return new UserServiceSdk(
-                $app->make(TokenManager::class),
+                $app->make(TokenManagerInterface::class),
                 $app->make(UserServiceClient::class),
                 $app->make(UserSyncService::class)
             );

@@ -3,6 +3,7 @@
 namespace Jinom\UserServiceSdk\Services;
 
 use Illuminate\Support\Facades\Log;
+use Jinom\Keycloak\Contracts\TokenManagerInterface;
 use Jinom\UserServiceSdk\Events\UserSyncFailed;
 use Jinom\UserServiceSdk\Events\UserSyncSucceeded;
 use Jinom\UserServiceSdk\Exceptions\UserServiceException;
@@ -11,7 +12,7 @@ use Jinom\UserServiceSdk\Jobs\SyncUserToUserServiceJob;
 class UserSyncService
 {
     public function __construct(
-        private TokenManager $tokenManager,
+        private TokenManagerInterface $tokenManager,
         private UserServiceClient $userServiceClient
     ) {}
 

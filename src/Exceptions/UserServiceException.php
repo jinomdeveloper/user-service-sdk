@@ -55,6 +55,17 @@ class UserServiceException extends Exception
     }
 
     /**
+     * Create exception for missing client token
+     */
+    public static function noClientToken(): self
+    {
+        return new self(
+            message: 'No client token available. Ensure Keycloak service account is configured correctly.',
+            code: 401
+        );
+    }
+
+    /**
      * Create exception for user not found
      */
     public static function userNotFound(string $identifier): self
