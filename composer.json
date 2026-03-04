@@ -20,7 +20,7 @@
     ],
     "require": {
         "php": "^8.2",
-        "jinom/keycloak-sdk": "^1.0",
+        "jinomdeveloper/jinom-token-management": "^1.0",
         "spatie/laravel-package-tools": "^1.16",
         "illuminate/contracts": "^10.0||^11.0||^12.0",
         "illuminate/support": "^10.0||^11.0||^12.0",
