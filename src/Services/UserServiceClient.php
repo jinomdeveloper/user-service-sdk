@@ -4,6 +4,7 @@ namespace Jinom\UserServiceSdk\Services;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Jinom\Keycloak\Contracts\TokenManagerInterface;
 use Jinom\UserServiceSdk\Exceptions\UserServiceException;
 
 class UserServiceClient
@@ -13,7 +14,7 @@ class UserServiceClient
     private int $timeout;
 
     public function __construct(
-        private TokenManager $tokenManager
+        private TokenManagerInterface $tokenManager
     ) {
         $this->baseUrl = rtrim(config('user-service-sdk.user_service.base_url', ''), '/');
         $this->timeout = config('user-service-sdk.user_service.timeout', 30);
@@ -24,7 +25,7 @@ class UserServiceClient
      */
     public function createUser(int|string $localUserId, array $userData): array
     {
-        $token = $this->getTokenOrFail($localUserId);
+        $token = $this->getUserTokenOrFail($localUserId);
 
         Log::debug('UserServiceSdk: Creating user in User Service', [
             'local_user_id' => $localUserId,
@@ -48,20 +49,30 @@ class UserServiceClient
     }
 
     /**
-     * Update user di User Service
+     * Update user di User Service menggunakan Client Token (system sync)
      */
     public function updateUser(int|string $localUserId, string $userId, array $userData): array
     {
-        $token = $this->getTokenOrFail($localUserId);
+        $token = $this->getClientTokenOrFail();
 
         Log::debug('UserServiceSdk: Updating user in User Service', [
             'local_user_id' => $localUserId,
             'user_service_id' => $userId,
         ]);
 
+        $userToUpdate = [
+            'username' => $userData['username'] ?? null,
+            'fullName' => $userData['fullname'] ?? $userData['fullName'] ?? null,
+            'email' => $userData['email'] ?? null,
+            'phone' => $userData['phone'] ?? $userData['phoneNumber'] ?? null,
+        ];
+
+        // Remove null values
+        $userToUpdate = array_filter($userToUpdate, fn ($value) => $value !== null);
+
         $response = Http::withToken($token)
             ->timeout($this->timeout)
-            ->patch("{$this->baseUrl}/api/v1/users-management/{$userId}", $userData);
+            ->patch("{$this->baseUrl}/api/v1/users-management/{$userId}", $userToUpdate);
 
         if (! $response->successful()) {
             throw UserServiceException::httpError($response->status(), $response->body());
@@ -76,14 +87,43 @@ class UserServiceClient
     }
 
     /**
-     * Find user by Keycloak Sub ID
+     * Update user's own profile using their token
+     */
+    public function updateOwnProfile(int|string $localUserId, array $userData): array
+    {
+        $token = $this->getUserTokenOrFail($localUserId);
+
+        Log::debug('UserServiceSdk: User updating own profile', [
+            'local_user_id' => $localUserId,
+        ]);
+
+        $response = Http::withToken($token)
+            ->timeout($this->timeout)
+            ->patch("{$this->baseUrl}/api/v1/users/profile", $userData);
+
+        if (! $response->successful()) {
+            throw UserServiceException::httpError($response->status(), $response->body());
+        }
+
+        return $response->json();
+    }
+
+    /**
+     * Find user by Keycloak Sub ID (uses Client Token - system check)
      */
     public function findByKeycloakId(int|string $localUserId, string $keycloakSub): ?array
     {
-        $token = $this->tokenManager->getValidToken($localUserId);
+        $token = $this->tokenManager->getClientToken();
 
         if (! $token) {
-            Log::warning('UserServiceSdk: No token for findByKeycloakId', [
+            Log::warning('UserServiceSdk: No client token for findByKeycloakId, falling back to user token', [
+                'local_user_id' => $localUserId,
+            ]);
+            $token = $this->tokenManager->getValidToken($localUserId);
+        }
+
+        if (! $token) {
+            Log::warning('UserServiceSdk: No token available for findByKeycloakId', [
                 'local_user_id' => $localUserId,
             ]);
 
@@ -123,11 +163,11 @@ class UserServiceClient
     }
 
     /**
-     * Get user by ID from User Service
+     * Get user by ID from User Service (uses Client Token)
      */
     public function getUser(int|string $localUserId, string $userId): ?array
     {
-        $token = $this->getTokenOrFail($localUserId);
+        $token = $this->getClientTokenOrFail();
 
         $response = Http::withToken($token)
             ->timeout($this->timeout)
@@ -145,11 +185,11 @@ class UserServiceClient
     }
 
     /**
-     * Delete user from User Service
+     * Delete user from User Service (uses Client Token - admin operation)
      */
     public function deleteUser(int|string $localUserId, string $userId): bool
     {
-        $token = $this->getTokenOrFail($localUserId);
+        $token = $this->getClientTokenOrFail();
 
         $response = Http::withToken($token)
             ->timeout($this->timeout)
@@ -163,7 +203,7 @@ class UserServiceClient
     }
 
     /**
-     * Create or update user (upsert)
+     * Create or update user (upsert) - uses Client Token
      */
     public function createOrUpdateUser(int|string $localUserId, string $keycloakSub, array $userData): array
     {
@@ -180,9 +220,23 @@ class UserServiceClient
     }
 
     /**
-     * Get valid token or throw exception
+     * Get client token or throw exception (for system operations)
      */
-    private function getTokenOrFail(int|string $localUserId): string
+    private function getClientTokenOrFail(): string
+    {
+        $token = $this->tokenManager->getClientToken();
+
+        if (! $token) {
+            throw UserServiceException::noClientToken();
+        }
+
+        return $token;
+    }
+
+    /**
+     * Get user token or throw exception (for user operations)
+     */
+    private function getUserTokenOrFail(int|string $localUserId): string
     {
         $token = $this->tokenManager->getValidToken($localUserId);
 

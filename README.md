@@ -4,10 +4,16 @@ Laravel package untuk auto-sync user ke User Service setelah login/register via 
 
 ## Features
 
-- **Token Management**: Store, refresh, dan manage Keycloak tokens dengan auto-refresh
 - **User Sync**: Otomatis sync user ke User Service setelah Keycloak login
 - **Async Queue**: Support async sync via Laravel Queue
 - **Flexible API**: Facade, trait, dan DI support
+- **Token Management**: Via [jinom/keycloak-sdk](https://github.com/jinom/keycloak-sdk)
+
+## Requirements
+
+- PHP ^8.2
+- Laravel ^10.0 | ^11.0 | ^12.0
+- [jinom/keycloak-sdk](https://github.com/jinom/keycloak-sdk) (auto-installed)
 
 ## Installation
 
@@ -19,6 +25,7 @@ Publish config file:
 
 ```bash
 php artisan vendor:publish --tag="user-service-sdk-config"
+php artisan vendor:publish --tag="keycloak-config"
 ```
 
 ## Configuration
@@ -26,7 +33,7 @@ php artisan vendor:publish --tag="user-service-sdk-config"
 Tambahkan environment variables:
 
 ```env
-# Keycloak
+# Keycloak (dari keycloak-sdk)
 KEYCLOAK_BASE_URL=https://keycloak.example.com
 KEYCLOAK_REALM=your-realm
 KEYCLOAK_CLIENT_ID=your-client-id
@@ -193,10 +200,10 @@ Konfigurasi field mapping di config file:
 
 ## Token Management
 
-### Manual Token Operations
+Token management disediakan oleh [jinom/keycloak-sdk](https://github.com/jinom/keycloak-sdk):
 
 ```php
-use Jinom\KeycloakSdk\Facades\KeycloakSdk;
+use Jinom\Keycloak\Facades\KeycloakSdk;
 
 // Store tokens
 KeycloakSdk::storeTokens($userId, [
@@ -207,21 +214,21 @@ KeycloakSdk::storeTokens($userId, [
 ]);
 
 // Get valid token (auto-refresh)
-$token = UserServiceSdk::getValidToken($userId);
+$token = KeycloakSdk::getValidToken($userId);
 
 // Get all token data
-$tokenData = UserServiceSdk::getTokenData($userId);
+$tokenData = KeycloakSdk::getTokenData($userId);
 
 // Check if has valid tokens
-if (UserServiceSdk::hasValidTokens($userId)) {
+if (KeycloakSdk::hasValidTokens($userId)) {
     // ...
 }
 
 // Clear tokens (on logout)
-UserServiceSdk::clearTokens($userId);
+KeycloakSdk::clearTokens($userId);
 
 // Introspect token
-$tokenInfo = UserServiceSdk::introspectToken($token);
+$tokenInfo = KeycloakSdk::introspectToken($token);
 ```
 
 ## User Service Client
@@ -300,7 +307,7 @@ php artisan queue:work --queue=user-sync
 ## Error Handling
 
 ```php
-use Jinom\UserServiceSdk\Exceptions\TokenRefreshException;
+use Jinom\Keycloak\Exceptions\TokenRefreshException;
 use Jinom\UserServiceSdk\Exceptions\UserServiceException;
 
 try {
